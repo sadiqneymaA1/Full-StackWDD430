@@ -1,0 +1,15 @@
+img{
+    max-height: 50px;
+}
+
+.heading{
+    font-size: 15pt;
+}
+
+.margin-top{
+    margin-top: 10px;
+}
+
+.btn{
+    background-color: rgba(172, 255, 47, 0.465);
+}
