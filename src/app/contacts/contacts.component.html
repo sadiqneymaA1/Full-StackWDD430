@@ -1,22 +1,11 @@
-<div class="container">
-    <div class="row">
-        <div class="col-md-5">
-            <cms-contact-list (selectedContactEvent)="selectedContact = $event">
-
-            </cms-contact-list>
-            
-        </div>
-        <div class="col-md-7">
-            <cms-contact-detail [contact]="selectedContact" *ngIf="selectedContact">
-
-
-            </cms-contact-detail>
-
-            <!-- [recipe]="selectedRecipe"></cms-contact-detail> -->
-            <ng-template #infoText>
-              <p>Please select a Recipe!</p>
-            </ng-template>
-         
-        </div>
-    </div>
+<div class="row">
+  <div class="col-md-5">
+    <cms-contact-list></cms-contact-list>
+  </div>
+  <div class="col-md-4">
+  <router-outlet></router-outlet>
+    <ng-template #infoText>
+      <p>Please Select a Contact</p>
+    </ng-template>
+  </div>
 </div>

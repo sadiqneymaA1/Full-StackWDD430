@@ -1,45 +1,45 @@
-import { Component, ElementRef, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
-import { response } from 'express';
-import { Contact } from 'src/app/contacts/contact.model';
-import { ContactService } from 'src/app/contacts/contact.service';
-import { Message } from '../message.model';
-import { MessageService } from '../message.service';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core'
+import { Message } from '../message.model'
+import { MessageService } from '../message.service'
 
 @Component({
-  selector: 'app-message-edit',
+  selector: 'cms-message-edit',
   templateUrl: './message-edit.component.html',
   styleUrls: ['./message-edit.component.css'],
 })
 export class MessageEditComponent implements OnInit {
-  @ViewChild('subject') subject: ElementRef;
-  @ViewChild('msgText') msgText: ElementRef;
-  @Output() addMessageEvent = new EventEmitter<Message>();
-  currentSender: Contact;
+  @ViewChild('subjectInput') subjectInput: ElementRef
+  @ViewChild('messageInput') messageInput: ElementRef
 
-  constructor(private messageService: MessageService, private contactService: ContactService) { }
+  // send this ingredient to the the list component
+  @Output() messageAdded = new EventEmitter<Message>()
 
-  ngOnInit() { 
-    this.contactService.getContact('101').subscribe(
-      response =>{
-        this.currentSender = response.contact;
-      });
-  }
+  currentSender: string = 'Lakeram'
 
+  constructor(private messageService: MessageService) {}
+
+  ngOnInit(): void {}
   onSendMessage() {
-    const message = new Message(
-      '1',
-      this.subject.nativeElement.value,
-      this.msgText.nativeElement.value,
-      this.currentSender
-    );
-
-    this.messageService.addMessage(message);
-
-    this.onClear();
+    const subJectInput = this.subjectInput.nativeElement.value
+    const messageInput = this.messageInput.nativeElement.value
+    const newMessage = new Message(
+      '567',
+      subJectInput,
+      messageInput,
+      this.currentSender,
+    )
+    // this.messageAdded.emit(newMessage)
+    this.messageService.addMessage(newMessage);
   }
-
   onClear() {
-    this.subject.nativeElement.value = '';
-    this.msgText.nativeElement.value = '';
+    this.subjectInput.nativeElement.value = ''
+    this.messageInput.nativeElement.value = ''
   }
 }
