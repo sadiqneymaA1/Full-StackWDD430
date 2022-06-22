@@ -11,3 +11,13 @@ git add .
 git commit -m " comment goes here"
 git push origin main
 
+git add .
+git commit -m " comment goes here"
+git push origin main
+git add .
+git commit -m " comment goes here"
+git push origin main
+git add .
+git commit -m " comment goes here"
+git push origin main
+
