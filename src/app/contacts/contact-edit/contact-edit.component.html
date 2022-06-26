@@ -79,7 +79,7 @@
       </div>
 
       <div class="row">
-        <div class="form-group">
+        <div class="col-sm-12 form-group">
           <label for="groupList">Group Contacts:</label>
 
           <div class="row" id="groupList"
@@ -96,11 +96,12 @@
             <span class="dragMsg" *ngIf="groupContacts?.length < 1">Drag contacts in group here</span>
           </div>
 
-        </div>
+       
+      </div>
+       </div>
              <div *ngIf="!f.valid" class=" alert alert-danger">
           The Name and Email fields are required
         </div>
-      </div>
 
 
       <div class="row">

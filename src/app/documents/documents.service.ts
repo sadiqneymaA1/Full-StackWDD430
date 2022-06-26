@@ -2,6 +2,8 @@ import { EventEmitter, Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Document } from './document.model';
 import { MOCKDOCUMENTS } from './MOCKDOCUMENTS';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -10,11 +12,11 @@ import { MOCKDOCUMENTS } from './MOCKDOCUMENTS';
 export class DocumentsService {
 documentSelected = new EventEmitter<Document>();
 documentChangedEvent = new Subject<Document[]>();
-private documents: Document[]=[];
+documents: Document[]=[];
 maxId:number;
 
-constructor() { 
-    this.documents=MOCKDOCUMENTS;
+constructor(private http: HttpClient) { 
+    // this.documents=MOCKDOCUMENTS;
     this.maxId = this.getMaxId();
   }
 
@@ -22,8 +24,17 @@ constructor() {
   * GET ALL THE Documents IN THE DB WILL RETURN A COPY OF THE COLLECTION
   * ******************** ***********************************************/
   getDocuments(){
-    return this.documents.slice();
-  }
+    // return this.documents.slice();
+    this.http.get("https://cmsproject-35804-default-rtdb.firebaseio.com/documents.json")
+    .subscribe((documents:Document[])=>{
+      console.log(documents)
+      this.documents = documents;
+      this.maxId = this.getMaxId()
+      this.documentChangedEvent.next(this.documents.slice());
+    }, (error) =>{
+      console.log(error)
+    })
+    }
 
   /*****************************************
   * GET A DOCUMENT IN THE DB BASED ON AN ID
@@ -51,7 +62,7 @@ constructor() {
       return;
    }
    this.documents.splice(pos, 1);
-   this.documentChangedEvent.next(this.documents.slice());
+   this.storeDocument();
 }
 
 
@@ -86,7 +97,7 @@ getMaxId(){
     this.maxId++;
     newDoc.id = this.maxId.toString()
     this.documents.push(newDoc);
-    this.documentChangedEvent.next(this.documents.slice());
+    this.storeDocument();
     
   }
 
@@ -107,7 +118,19 @@ getMaxId(){
 
     this.documents[pos] = newDoc;
 
-    this.documentChangedEvent.next(this.documents.slice());
+    this.storeDocument()
+  }
+
+  storeDocument()
+  {
+    const documents = JSON.stringify(this.documents);
+
+    const headers = new HttpHeaders()
+   .set('content-type', 'application/json')
+   .set('Access-Control-Allow-Origin', '*');
+
+   this.http.put('https://cmsproject-35804-default-rtdb.firebaseio.com/documents.json', documents, {headers:headers} )
+        .subscribe(data => this.documentChangedEvent.next(this.documents.slice()) );
   }
 
 }

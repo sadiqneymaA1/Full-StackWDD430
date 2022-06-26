@@ -1,3 +1,5 @@
+
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { EventEmitter, Injectable } from '@angular/core';
 import { concat, Subject } from 'rxjs';
 import { Contact } from './contact.model';
@@ -12,7 +14,7 @@ export class ContactsService {
   private contacts: Contact[]=[];
   maxId:number;
 
-  constructor() {
+  constructor(private http: HttpClient) {
     this.contacts = MOCKCONTACTS;
     this.maxId = this.getMaxId();
    }
@@ -22,7 +24,16 @@ export class ContactsService {
     * WILL RETURN A COPY OF THE COLLECTION
     * ******************** */
     getContacts(){
-     return this.contacts.slice();
+    //  return this.contacts.slice();
+     this.http.get("https://cmsproject-35804-default-rtdb.firebaseio.com/contacts.json")
+    .subscribe((contacts:Contact[])=>{
+      console.log(contacts)
+      this.contacts = contacts;
+      this.maxId = this.getMaxId()
+      this.contactChangedEvent.next(this.contacts.slice());
+    }, (error) =>{
+      console.log(error)
+    })
     }
 
     /*****************************************
@@ -51,7 +62,7 @@ export class ContactsService {
           return;
       }
       this.contacts.splice(pos, 1);
-      this.contactChangedEvent.next(this.contacts.slice());
+       this.storeContact()
     }
 
     /******************************************************
@@ -85,7 +96,7 @@ export class ContactsService {
     this.maxId++;
     newContact.id = this.maxId.toString()
     this.contacts.push(newContact);
-    this.contactChangedEvent.next(this.contacts.slice());
+     this.storeContact()
     
   }
 
@@ -106,7 +117,18 @@ export class ContactsService {
 
     this.contacts[pos] = newContact;
 
-    this.contactChangedEvent.next(this.contacts.slice());
+    this.storeContact()
   }
    
+   storeContact()
+  {
+    const contacts = JSON.stringify(this.contacts);
+
+    const headers = new HttpHeaders()
+   .set('content-type', 'application/json')
+   .set('Access-Control-Allow-Origin', '*');
+
+   this.http.put('https://cmsproject-35804-default-rtdb.firebaseio.com/contacts.json', contacts, {headers:headers} )
+        .subscribe(data => this.contactChangedEvent.next(this.contacts.slice()) );
+  }
 }

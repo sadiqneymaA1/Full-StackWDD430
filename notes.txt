@@ -31,3 +31,4 @@ git add .
 git commit -m " comment goes here"
 git push origin main
 
+copy pakage.jsons the long one.

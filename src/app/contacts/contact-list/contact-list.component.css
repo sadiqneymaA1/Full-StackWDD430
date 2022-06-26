@@ -1,3 +1,18 @@
 .newContact {
     margin-top: -40px;
 }
+
+.new-contact-btn
+{
+    margin-top: -50px;
+}
+/* 
+.panel-heading
+{
+    margin-left: 10px; 
+}*/
+
+.search, .title
+{
+   margin-left: 10px;  
+}
