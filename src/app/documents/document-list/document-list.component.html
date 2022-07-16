@@ -8,9 +8,9 @@
   <div class="panel-body">
     <div class="center-panel">
       <cms-document-item
-        *ngFor="let documentEl of documents"
+        *ngFor="let documentEl of documents; let i =index"
         [document]="documentEl"
-        ></cms-document-item> 
+        ></cms-document-item>
     </div>
   </div>
 </div>
