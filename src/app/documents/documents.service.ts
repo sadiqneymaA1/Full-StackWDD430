@@ -1,7 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Document } from './document.model';
-import { MOCKDOCUMENTS } from './MOCKDOCUMENTS';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({
@@ -25,7 +24,7 @@ constructor(private http: HttpClient) {
   * ******************** ***********************************************/
   getDocuments(){
     // return this.documents.slice();
-    this.http.get("https://cmsproject-35804-default-rtdb.firebaseio.com/documents.json")
+    this.http.get("http://localhost:3000/documents")
     .subscribe((documents:Document[])=>{
       console.log(documents)
       this.documents = documents;
@@ -53,17 +52,28 @@ constructor(private http: HttpClient) {
   /********************************************
   * DELETE A DOC IN THE DB BASED ON AN ID
   * ******************************************/ 
-  deleteDocument(document: Document) {
-   if (!document) {
+  
+deleteDocument(document: Document) {
+
+    if (!document) {
       return;
-   }
-   const pos = this.documents.indexOf(document);
-   if (pos < 0) {
+    }
+
+    const pos = this.documents.findIndex(d => d.id === document.id);
+
+    if (pos < 0) {
       return;
-   }
-   this.documents.splice(pos, 1);
-   this.storeDocument();
-}
+    }
+
+    // delete from database
+    this.http.delete('http://localhost:3000/documents/' + document.id)
+      .subscribe(
+        (response: Response) => {
+          this.documents.splice(pos, 1);
+          this.sortAndSend();
+        }
+      );
+  }
 
 
  /******************************************************
@@ -88,40 +98,66 @@ getMaxId(){
   /********************************************
   * WILL CREATE A NEW ENTRY FOR THE COLLECTION
   * ****************************************** */
-  addDocument(newDoc:Document){
-    if(!newDoc)
-    {
-      return
+
+  addDocument(document: Document) {
+    if (!document) {
+      return;
     }
 
-    this.maxId++;
-    newDoc.id = this.maxId.toString()
-    this.documents.push(newDoc);
-    this.storeDocument();
-    
+    // make sure id of the new Document is empty
+    document.id = '';
+
+    const headers = new HttpHeaders({'Content-Type': 'application/json'});
+
+    // add to database
+    this.http.post<{ message: string, document: Document }>('http://localhost:3000/documents/',
+      document,
+      { headers: headers })
+      .subscribe(
+        (responseData) => {
+          // add new document to documents
+          this.documents.push(responseData.document);
+          this.sortAndSend();
+          // storeDocument()
+
+        }
+      );
   }
 
   /********************************************
   * WILL UPDATE A ENTRY IN THE COLLECTION
   * ****************************************** */
-  upDateDocument(originalDoc: Document, newDoc:Document){
-    if(!originalDoc || !newDoc)
-    {
-      return
+  updateDocument(originalDocument: Document, newDocument: Document) {
+    if (!originalDocument || !newDocument) {
+      return;
     }
 
-    const pos = this.documents.indexOf(originalDoc);
+    const pos = this.documents.findIndex(d => d.id === originalDocument.id);
+
     if (pos < 0) {
-        return;
+      return;
     }
-    newDoc.id = originalDoc.id;
 
-    this.documents[pos] = newDoc;
+    // set the id of the new Document to the id of the old Document
+    newDocument.id = originalDocument.id;
+    newDocument._id = originalDocument._id;
 
-    this.storeDocument()
+    const headers = new HttpHeaders({'Content-Type': 'application/json'});
+
+    // update database
+    this.http.put('http://localhost:3000/documents/' + originalDocument.id,
+      newDocument, { headers: headers })
+      .subscribe(
+        (response: Response) => {
+          this.documents[pos] = newDocument;
+          this.sortAndSend();
+        }
+      );
   }
 
-  storeDocument()
+
+
+  sortAndSend()
   {
     const documents = JSON.stringify(this.documents);
 
@@ -129,7 +165,7 @@ getMaxId(){
    .set('content-type', 'application/json')
    .set('Access-Control-Allow-Origin', '*');
 
-   this.http.put('https://cmsproject-35804-default-rtdb.firebaseio.com/documents.json', documents, {headers:headers} )
+   this.http.put('http://localhost:3000/documents/', documents, {headers:headers} )
         .subscribe(data => this.documentChangedEvent.next(this.documents.slice()) );
   }
 

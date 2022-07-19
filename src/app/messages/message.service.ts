@@ -16,7 +16,7 @@ export class MessageService {
 
   getMessages(){
     // return this.messages.slice();
-     this.http.get("https://cmsproject-35804-default-rtdb.firebaseio.com/messages.json")
+     this.http.get("http://localhost:3000/documents")
     .subscribe((messages:Message[])=>{
       console.log(messages)
       this.messages = messages;

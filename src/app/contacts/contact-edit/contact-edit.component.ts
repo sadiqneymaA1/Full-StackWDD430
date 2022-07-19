@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { Contact } from '../contact.model';
 import { ContactsService } from '../contacts.service';
 
@@ -11,12 +12,14 @@ import { ContactsService } from '../contacts.service';
   templateUrl: './contact-edit.component.html',
   styleUrls: ['./contact-edit.component.css']
 })
-export class ContactEditComponent implements OnInit {
+export class ContactEditComponent implements OnInit , OnDestroy{
+  @ViewChild('f') slForm: NgForm;
   orignalContact:Contact
   groupContacts: Contact[] =[]
   contact:Contact
   editMode: Boolean = false;
   id:string
+  subsription: Subscription;
 
    constructor(
         private contactService: ContactsService,
@@ -25,7 +28,7 @@ export class ContactEditComponent implements OnInit {
         }
 
   ngOnInit(): void {
-    this.route.params.
+    this.subsription = this.route.params.
      subscribe((params: Params)=>{
         this.id = params['id']
         if(this.id == null)
@@ -43,10 +46,19 @@ export class ContactEditComponent implements OnInit {
       this.editMode = true;
       this.contact = JSON.parse(JSON.stringify(this.orignalContact));
       
-      if(this.contact.group)
-      {
-        this.groupContacts =  JSON.parse(JSON.stringify(this.orignalContact.group));
-      }
+      // if(this.contact.group)
+      // {
+      //   this.groupContacts =  JSON.parse(JSON.stringify(this.orignalContact.group));
+      // }
+      console.log(this.slForm)
+      this.slForm.setValue({
+        id: this.orignalContact.id,
+        name: this.orignalContact.name,
+        email: this.orignalContact.email,
+        phone: this.orignalContact.phone,
+        imageUrl: this.orignalContact.imageUrl,
+        group: this.orignalContact.group
+      })
       
       })
 
@@ -60,7 +72,9 @@ export class ContactEditComponent implements OnInit {
   onSubmit(form:NgForm)
   {
     const value = form.value;
-    const newContact = new Contact(value.id, value.name, value.email, value.phone, value.imageUrl, value.group);
+    const newContact = new Contact(null,value.id, value.name, value.email, value.phone, value.imageUrl, value.group);
+    console.log(value)
+    console.log(newContact)
     if(this.editMode)
     {
       this.contactService.upDateContact(this.orignalContact, newContact);
@@ -110,4 +124,8 @@ export class ContactEditComponent implements OnInit {
    }
    this.groupContacts.splice(index, 1);
 }
+
+ ngOnDestroy(): void {
+      this.subsription.unsubscribe();
+  }
 }
